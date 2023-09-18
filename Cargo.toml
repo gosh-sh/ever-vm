@@ -14,6 +14,9 @@ log = '0.4'
 num = '0.4'
 num-traits = '0.2'
 rand = '0.7'
+sha1 = { optional = true, version = '0.10.5' }
+sha2 = { optional = true, version = '0.10.7' }
+sha3 = { optional = true, version = '0.10.8' }
 diffy = { optional = true, version = '0.2.2' }
 similar = { features = [ 'bytes' ], optional = true, version = '2.2.0' }
 ton_block = { git = 'https://github.com/tonlabs/ever-block.git', tag = '1.9.88' }
@@ -22,7 +25,7 @@ zstd = { default-features = false, optional = true, version = '0.11' }
 
 [features]
 fift_check = [  ]
-gosh = [ 'ton_block/gosh', 'diffy', 'similar', 'zstd' ]
+gosh = [ 'ton_block/gosh', 'diffy', 'similar', 'zstd', 'sha1', 'sha2', 'sha3' ]
 log_file = [  ]
 signature_no_check = [  ]
 signature_with_id = [ 'ton_block/signature_with_id' ]

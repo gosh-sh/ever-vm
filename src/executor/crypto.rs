@@ -30,6 +30,18 @@ use std::borrow::Cow;
 use ton_block::GlobalCapabilities;
 use ton_types::{BuilderData, error, GasConsumer, ExceptionCode, UInt256};
 
+#[cfg(feature = "gosh")]
+use sha1::{Sha1, Digest};
+#[cfg(feature = "gosh")]
+use sha2::Sha256;
+#[cfg(feature = "gosh")]
+use sha3::Keccak256;
+#[cfg(feature = "gosh")]
+use crate::utils::unpack_data_from_cell;
+#[cfg(feature = "gosh")]
+use ton_types::SliceData;
+
+
 const PUBLIC_KEY_BITS:  usize = PUBLIC_KEY_BYTES * 8;
 const SIGNATURE_BITS:   usize = SIGNATURE_BYTES * 8;
 const PUBLIC_KEY_BYTES: usize = ed25519_dalek::PUBLIC_KEY_LENGTH;
@@ -78,6 +90,49 @@ pub(super) fn execute_sha256u(engine: &mut Engine) -> Status {
     } else {
         err!(ExceptionCode::CellUnderflow)
     }
+}
+
+// SHA1 ( c – x )
+// Computes sha1 of the data of Cell.
+// The hash value is returned as a 256-bit unsigned integer x.
+#[cfg(feature = "gosh")]
+pub(super) fn execute_sha1(engine: &mut Engine) -> Status {
+    engine.load_instruction(Instruction::new("SHA1"))?;
+    let hasher = Sha1::new();
+    calculate_hash(engine, hasher)
+}
+
+// SHA256 ( c – x )
+// Computes sha256 of the data of Cell.
+// The hash value is returned as a 256-bit unsigned integer x.
+#[cfg(feature = "gosh")]
+pub(super) fn execute_sha256(engine: &mut Engine) -> Status {
+    engine.load_instruction(Instruction::new("SHA256"))?;
+    let hasher = Sha256::new();
+    calculate_hash(engine, hasher)
+}
+
+// KECCAK256 ( c – x )
+// Computes keccak256 hash of the data of Cell.
+// The hash value is returned as a 256-bit unsigned integer x.
+#[cfg(feature = "gosh")]
+pub(super) fn execute_keccak256(engine: &mut Engine) -> Status {
+    engine.load_instruction(Instruction::new("KECCAK256"))?;
+    let hasher = Keccak256::new();
+    calculate_hash(engine, hasher)
+}
+
+#[cfg(feature = "gosh")]
+fn calculate_hash(engine: &mut Engine, mut hasher: impl Digest) -> Status
+{
+    fetch_stack(engine, 1)?;
+    let s = SliceData::load_cell_ref(engine.cmd.var(0).as_cell()?)?;
+    let data = unpack_data_from_cell(s, engine)?;
+    hasher.update(data);
+    let hash = hasher.finalize();
+    let hash_int = hash_to_uint(hash);
+    engine.cc.stack.push(StackItem::integer(hash_int));
+    Ok(())
 }
 
 enum DataForSignature {
