@@ -366,7 +366,8 @@ impl Handlers {
                 .set(0x24, execute_diff_patch_binary_quiet)
                 .set(0x25, execute_diff_patch_binary_zip_quiet)
                 .set(0x26, execute_sha1)
-                .set(0x27, execute_keccak256);
+                .set(0x27, execute_keccak256)
+                .set(0x28, execute_sha256);
         }
         self.add_subset(0xC7, &mut c7_handlers)
     }

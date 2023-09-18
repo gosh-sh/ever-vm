@@ -33,6 +33,8 @@ use ton_types::{BuilderData, error, GasConsumer, ExceptionCode, UInt256};
 #[cfg(feature = "gosh")]
 use sha1::{Sha1, Digest};
 #[cfg(feature = "gosh")]
+use sha2::Sha256;
+#[cfg(feature = "gosh")]
 use sha3::Keccak256;
 #[cfg(feature = "gosh")]
 use crate::utils::unpack_data_from_cell;
@@ -97,6 +99,16 @@ pub(super) fn execute_sha256u(engine: &mut Engine) -> Status {
 pub(super) fn execute_sha1(engine: &mut Engine) -> Status {
     engine.load_instruction(Instruction::new("SHA1"))?;
     let hasher = Sha1::new();
+    calculate_hash(engine, hasher)
+}
+
+// SHA256 ( c – x )
+// Computes sha256 of the data of Cell.
+// The hash value is returned as a 256-bit unsigned integer x.
+#[cfg(feature = "gosh")]
+pub(super) fn execute_sha256(engine: &mut Engine) -> Status {
+    engine.load_instruction(Instruction::new("SHA256"))?;
+    let hasher = Sha256::new();
     calculate_hash(engine, hasher)
 }
 
