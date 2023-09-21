@@ -14,7 +14,7 @@
 use crate::{
     error::TvmError,
     executor::{
-        engine::{Engine, storage::fetch_stack}, types::Instruction
+        engine::{Engine, storage::fetch_stack}, gas::gas_state::Gas, types::Instruction
     },
     stack::{
         StackItem,
@@ -128,6 +128,7 @@ fn calculate_hash(engine: &mut Engine, mut hasher: impl Digest) -> Status
     fetch_stack(engine, 1)?;
     let s = SliceData::load_cell_ref(engine.cmd.var(0).as_cell()?)?;
     let data = unpack_data_from_cell(s, engine)?;
+    engine.try_use_gas(Gas::zip_fee_for_byte(data.len() as i64))?;
     hasher.update(data);
     let hash = hasher.finalize();
     let hash_int = hash_to_uint(hash);
