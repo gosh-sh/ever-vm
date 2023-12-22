@@ -103,6 +103,8 @@ pub struct Engine {
     block_version: u32,
     #[cfg(feature = "signature_with_id")]
     signature_id: i32,
+    vm_execution_is_block_related: Arc<Mutex<bool>>,
+    block_collation_was_finished: Arc<Mutex<bool>>,
 }
 
 #[cfg(feature = "signature_no_check")]
@@ -264,7 +266,18 @@ impl Engine {
             block_version: 0,
             #[cfg(feature = "signature_with_id")]
             signature_id: 0,
+            vm_execution_is_block_related: Arc::new(Mutex::new(false)),
+            block_collation_was_finished: Arc::new(Mutex::new(false)),
         }
+    }
+
+    pub fn set_block_related_flags(
+        &mut self,
+        vm_execution_is_block_related: Arc<Mutex<bool>>,
+        block_collation_was_finished: Arc<Mutex<bool>>,
+    ) {
+        self.vm_execution_is_block_related = vm_execution_is_block_related;
+        self.block_collation_was_finished = block_collation_was_finished;
     }
 
     pub fn set_block_version(&mut self, block_version: u32) {
