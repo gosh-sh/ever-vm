@@ -280,6 +280,19 @@ impl Engine {
         self.block_collation_was_finished = block_collation_was_finished;
     }
 
+    pub fn mark_execution_as_block_related(&mut self) -> Status {
+        log::trace!("Mark execution as block related");
+        {
+            let mut flag = self.vm_execution_is_block_related.lock().unwrap();
+            *flag = true;
+        }
+        let block_was_finalized = self.block_collation_was_finished.lock().unwrap();
+        if *block_was_finalized {
+            failure::bail!("Transaction is block related and block was finalized before it's finalization.");
+        }
+        Ok(())
+    }
+
     pub fn set_block_version(&mut self, block_version: u32) {
         self.block_version = block_version
     }
